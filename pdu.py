@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 """ 
 * APC Orchestrator
 ' Date: 7/11/2018
@@ -21,14 +21,14 @@ class Printer(object):
 
     def menu(self):
         os.system('clear')
-        print '*'* 64
-        print '1). Status of all outlets'
-        print '2). Status of an outlet'
-        print '3). Change outlet state'
-        print '4). Exit'
-        print '-'*64
-        print ''
-        ans = raw_input('Please make a selection: ')
+        print('*'* 64)
+        print('1). Status of all outlets')
+        print('2). Status of an outlet')
+        print('3). Change outlet state')
+        print('4). Exit')
+        print('-'*64)
+        print('')
+        ans = input('Please make a selection: ')
         return ans
 
     def outlet_status(self, pstatus):
@@ -84,7 +84,7 @@ def main():
                     port += 1
             elif _ans == '2' or '3' or args.port: 
                 if args.port: specific_port = args.port 
-                else: specific_port = raw_input('Which outlet?: ' )
+                else: specific_port = input('Which outlet?: ' )
                 specific_result = Outlet_tasks(args.device).outlet_check(specific_port)
                 Printer(specific_port).outlet_status(specific_result)
             if _ans == '3' or args.state:
@@ -103,8 +103,8 @@ def main():
             if args.port: break
             _con = raw_input('Please press enter to continue...')
     except(KeyboardInterrupt):
-        print ''
-        print 'Existing script'
+        print('')
+        print('Existing script')
         exit()
 
 if __name__ == '__main__':
