@@ -34,7 +34,7 @@ class Printer(object):
     def outlet_status(self, pstatus):
         _status = 'on' if pstatus == '1' else 'off' 
         _color = self.colorg if pstatus == '1' else self.colorr
-        print('\nOutlet {}   ---> {}{}{}').format(self.port,_color,_status,self.colorend)
+        print('\nOutlet {}   ---> {}{}{}'.format(self.port,_color,_status,self.colorend))
 
             
 class Outlet_tasks(object):
@@ -49,7 +49,8 @@ class Outlet_tasks(object):
     def outlet_check(self,port):
         _oid_port = self.oid + str(port)
         _result = subprocess.Popen(['snmpwalk', self.version, '-l', 'noauthnopriv',  '-u', self.user, self.ip_addr, _oid_port], stdout=subprocess.PIPE )
-        _result = _result.stdout.read().strip(' ').split(' ') 
+        _result = _result.stdout.read()
+        _result = _result.decode('utf-8').strip(' ').split(' ')
         result = _result[3].strip('\n')
         return result
 
@@ -89,7 +90,7 @@ def main():
                 Printer(specific_port).outlet_status(specific_result)
             if _ans == '3' or args.state:
                 if args.state: on_off = args.state
-                else: on_off = raw_input('Power On/Off: ')
+                else: on_off = input('Power On/Off: ')
                 _pstatus = 'on' if specific_result == '1' else 'off'
                 if on_off.lower() == _pstatus:
                     print('port is already powered {}{}{}. Please try again').format(Printer().colorr,_pstatus, Printer().colorend)
@@ -101,7 +102,7 @@ def main():
                 print('Exising tool. Goodbye!')
                 sys.exit(1)
             if args.port: break
-            _con = raw_input('Please press enter to continue...')
+            _con = input('Please press enter to continue...')
     except(KeyboardInterrupt):
         print('')
         print('Existing script')
