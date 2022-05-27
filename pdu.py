@@ -67,6 +67,7 @@ class Outlet_tasks(object):
 
 
 
+
 def main():
     _ans = '0'
     if os.name == 'nt': print('This tool is only supported in linux/bsd variant operating systems'), sys.exit(1)
@@ -95,6 +96,7 @@ def main():
                 if args.state: on_off = args.state
                 else:
                     specific_port = input('Which outlet?: ' )
+                    specific_result = Outlet_tasks(args.device).outlet_check(specific_port)
                     on_off = input('Power On/Off: ')
                 _pstatus = 'on' if specific_result == '1' else 'off'
                 if on_off.lower() == _pstatus:
