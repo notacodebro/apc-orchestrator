@@ -70,8 +70,12 @@ class Outlet_tasks(object):
         _result = subprocess.Popen(['snmpwalk', self.version, '-l', 'noauthnopriv',  '-u', self.user, self.ip_addr, _oid_name], stdout=subprocess.PIPE )
         _result = _result.stdout.read()
         _result = _result.decode().strip(' ').split(' ')
-        result = _result[3].strip('\n').strip(' ')
-        return result
+        try:
+            result = _result[3]
+            return result
+        except IndexError:
+            pass
+        #return result
 
 def main():
     _ans = '0'
