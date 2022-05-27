@@ -20,6 +20,7 @@ class Printer(object):
         self.colorend = '\033[0m'
 
     def menu(self):
+        ans = '0'
         os.system('clear')
         print('*'* 64)
         print('1). Status of all outlets')
@@ -50,7 +51,7 @@ class Outlet_tasks(object):
         _oid_port = self.oid + str(port)
         _result = subprocess.Popen(['snmpwalk', self.version, '-l', 'noauthnopriv',  '-u', self.user, self.ip_addr, _oid_port], stdout=subprocess.PIPE )
         _result = _result.stdout.read()
-        _result = _result.decode('utf-8').strip(' ').split(' ')
+        _result = _result.decode().strip(' ').split(' ')
         result = _result[3].strip('\n')
         return result
 
@@ -59,14 +60,16 @@ class Outlet_tasks(object):
         _power = '1' if on_off == 'on' else '2'
         _oid_port = self.oid + str(port) 
         _result = subprocess.Popen(['snmpset', self.version, '-l', 'noauthnopriv',  '-u', self.user, self.ip_addr, _oid_port, 'i',  _power], stdout=subprocess.PIPE )
-        _result = _result.stdout.read().strip(' ').split(' ') 
+        _result = _result.stdout.read()
+        _result = _result.decode().strip(' ').split(' ')
         result = _result[3].strip('\n')
         return result
 
 
+
 def main():
-    if os.name == 'nt': print('This tool is only supported in linux/bsd variant operating systems'), sys.exit(1)
     _ans = '0'
+    if os.name == 'nt': print('This tool is only supported in linux/bsd variant operating systems'), sys.exit(1)
     try:
         parser = argparse.ArgumentParser()
         parser.add_argument('--interactive', help='run the tool in interactive mode', required=False, action='store_true')
@@ -83,26 +86,29 @@ def main():
                     all_result = Outlet_tasks(args.device).outlet_check(port)
                     Printer(port).outlet_status(all_result)
                     port += 1
-            elif _ans == '2' or '3' or args.port: 
-                if args.port: specific_port = args.port 
+            elif _ans == '2' or args.port is not None: 
+                if args.port: specific_port = args.port
                 else: specific_port = input('Which outlet?: ' )
                 specific_result = Outlet_tasks(args.device).outlet_check(specific_port)
                 Printer(specific_port).outlet_status(specific_result)
-            if _ans == '3' or args.state:
+            elif _ans == '3' or args.state is not None:
                 if args.state: on_off = args.state
-                else: on_off = input('Power On/Off: ')
+                else:
+                    specific_port = input('Which outlet?: ' )
+                    on_off = input('Power On/Off: ')
                 _pstatus = 'on' if specific_result == '1' else 'off'
                 if on_off.lower() == _pstatus:
-                    print('port is already powered {}{}{}. Please try again').format(Printer().colorr,_pstatus, Printer().colorend)
+                    print('port is already powered {}{}{}. Please try again'.format(Printer().colorr,_pstatus, Printer().colorend))
                 else:
                     result = Outlet_tasks(args.device).outlet_control(specific_port, on_off)
-                    print('\nport {} has been successfully powered {}!! Confirmation below: ').format(specific_port, on_off.lower())
+                    print('\nport {} has been successfully powered {}!! Confirmation below: '.format(specific_port, on_off.lower()))
                     Printer(specific_port).outlet_status(result)
             elif _ans == '4':
                 print('Exising tool. Goodbye!')
                 sys.exit(1)
-            if args.port: break
+            elif args.port: break
             _con = input('Please press enter to continue...')
+            _ans = Printer().menu()
     except(KeyboardInterrupt):
         print('')
         print('Existing script')
