@@ -32,10 +32,10 @@ class Printer(object):
         ans = input('Please make a selection: ')
         return ans
 
-    def outlet_status(self, pstatus):
+    def outlet_status(self, pstatus,name):
         _status = 'on' if pstatus == '1' else 'off' 
         _color = self.colorg if pstatus == '1' else self.colorr
-        print('\nOutlet {}   ---> {}{}{}'.format(self.port,_color,_status,self.colorend))
+        print('\nOutlet {}: {}   ---> {}{}{}'.format(self.port,name,_color,_status,self.colorend))
 
             
 class Outlet_tasks(object):
@@ -46,7 +46,7 @@ class Outlet_tasks(object):
         self.user = user
         self.outlet = outlet_num
         self.oid =  '1.3.6.1.4.1.318.1.1.4.4.2.1.3.'
-
+        self.oid_name = '1.3.6.1.4.1.318.1.1.4.4.2.1.4.'
     def outlet_check(self,port):
         _oid_port = self.oid + str(port)
         _result = subprocess.Popen(['snmpwalk', self.version, '-l', 'noauthnopriv',  '-u', self.user, self.ip_addr, _oid_port], stdout=subprocess.PIPE )
@@ -65,8 +65,13 @@ class Outlet_tasks(object):
         result = _result[3].strip('\n')
         return result
 
-
-
+    def get_name(self, port):
+        _oid_name = self.oid_name + str(port)
+        _result = subprocess.Popen(['snmpwalk', self.version, '-l', 'noauthnopriv',  '-u', self.user, self.ip_addr, _oid_name], stdout=subprocess.PIPE )
+        _result = _result.stdout.read()
+        _result = _result.decode().strip(' ').split(' ')
+        result = _result[3].strip('\n').strip(' ')
+        return result
 
 def main():
     _ans = '0'
@@ -85,13 +90,15 @@ def main():
             if _ans == '1':
                 while port != 17:
                     all_result = Outlet_tasks(args.device).outlet_check(port)
-                    Printer(port).outlet_status(all_result)
+                    name = Outlet_tasks(args.device).get_name(port)
+                    Printer(port).outlet_status(all_result,name)
                     port += 1
             elif _ans == '2' or args.port is not None: 
                 if args.port: specific_port = args.port
                 else: specific_port = input('Which outlet?: ' )
                 specific_result = Outlet_tasks(args.device).outlet_check(specific_port)
-                Printer(specific_port).outlet_status(specific_result)
+                name = Outlet_tasks(args.device).get_name(specific_port)
+                Printer(specific_port).outlet_status(specific_result,name)
             elif _ans == '3' or args.state is not None:
                 if args.state: on_off = args.state
                 else:
