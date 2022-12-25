@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-""" 
-* APC Orchestrator
-' Date: 7/11/2018
-"""
 
 import os
 import sys
